@@ -7,13 +7,13 @@
     <body>
         <h1>This is the start of Narrative Visualization !!</h1>
         <p>I am going to get this done !!</p>
-        <svg widht="300" height="300">
+        <svg width="300" height="300">
 
         </svg>
         <script>
         var data = [1,2,3,1,4,5];
         d3.select("svg").selectAll("rect").data(data).enter().append("rect")
-        .attr("widht",45)
+        .attr("width",45)
         .attr("height", function(d) {return 50*d; })
         .attr("x", function(d,i) {return 50*i })
         .attr("y", function(d,i) {return 250 - 10*d;});
