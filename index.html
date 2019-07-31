@@ -1,27 +1,37 @@
 <!DOCTYPE html>
-<script src='https://d3js.org/d3.v5.min.js'></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <html>
     <head>
         <link rel="stylesheet" href="styles.css">
+        <script src="Java_Scripts/check.js"></script>
     </head>
-    <body onload='init()'>
-        <svg width="300" height="300">
+    <body>
+        <button onclick="slideOne()">1</button><button onclick="slideTwo()">2</button>
+        <svg width="1000" height="1000">
         </svg>
-        <script>
-        async function init() {
-          var data = await d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/summer.csv');
-          var margin = 50;
-          var height, width = 300;
-          var xScale = d3.scaleLinear().domain(data).range([0,width]);
-          var yScale = d3.scaleLinear().domain([0,500]).range([height,0]);
-          d3.select("svg").append("g")
-          .attr("transform","translate("+margin+","+margin+")")
-          .call(d3.axisLeft(yScale))
-          .attr("transform","translate("+margin+","+margin+")")
-          .call(d3.axisBottom(xScale));
-
+    </body>
+    <script>
+      function slideOne()
+      {
+        var startYear = "1896";
+        var endYear = "1925";
+        async function init()
+        {
+          const slideOneData = await d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/summer.csv', function(d)
+          {
+            if ((d.Year >= startYear) && (d.Year <= endYear))
+            {
+              return
+              {
+                yearOfOlympics : d.year =+d.year;
+                medalOwn : d.Medal;
+                winnerGeneder : d.Gender
+              };
+            }
+          })
+          console.log(slideOneData);
         }
 
-        </script>
-    </body>
+      }
+    </script>
 </html>
