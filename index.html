@@ -1,37 +1,29 @@
 <!DOCTYPE html>
-<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <html>
-    <head>
-        <link rel="stylesheet" href="styles.css">
-        <script src="Java_Scripts/check.js"></script>
-    </head>
-    <body>
-        <button onclick="slideOne()">1</button><button onclick="slideTwo()">2</button>
-        <svg width="1000" height="1000">
-        </svg>
+<style>
+#nRadius-value {
+    font-family: sans-serif;
+    font-weight: bold;
+}
+</style>
+<body>
+    <p>
+      <label for="yearOfOlympics" 
+             style="display: inline-block; width: 500px; text-align: right">
+             Year: <span id="selectedYear" style="width:400px">1946</span>
+      </label>
+      <input type="range" min="1946" max="2013" value="1946" id="yearOfOlympics">
+    </p>
     </body>
-    <script>
-      function slideOne()
-      {
-        var startYear = "1896";
-        var endYear = "1925";
-        async function init()
-        {
-          const slideOneData = await d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/summer.csv', function(d)
-          {
-            if ((d.Year >= startYear) && (d.Year <= endYear))
-            {
-              return
-              {
-                yearOfOlympics : d.year =+d.year;
-                medalOwn : d.Medal;
-                winnerGeneder : d.Gender
-              };
-            }
-          })
-          console.log(slideOneData);
-        }
-
+    <script>      
+      var sliderRange = document.getElementById("yearOfOlympics");
+      d3.select("#yearOfOlympics-value").text(sliderRange.value);
+      var selectedYear = document.getElementById("selectedYear");
+      sliderRange.oninput = function() {
+        selectedYear.innerHTML = this.value;
       }
+      
     </script>
+
 </html>
