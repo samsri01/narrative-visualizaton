@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<html>
+<style>
+#nRadius-value {
+    font-family: sans-serif;
+    font-weight: bold;
+}
+</style>
+<body>
+    <p>
+      <label for="yearOfOlympics" 
+             style="display: inline-block; width: 500px; text-align: right">
+             Year: <span id="selectedYear" style="width:400px">1946</span>
+      </label>
+      <input type="range" min="1946" max="2013" value="1946" id="yearOfOlympics">
+    </p>
+    </body>
+    <script>      
+      var sliderRange = document.getElementById("yearOfOlympics");
+      d3.select("#yearOfOlympics-value").text(sliderRange.value);
+      var selectedYear = document.getElementById("selectedYear");
+      sliderRange.oninput = function() {
+        selectedYear.innerHTML = this.value;
+      }
+      
+    </script>
+
+</html>
