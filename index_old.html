@@ -1,29 +1,76 @@
 <!DOCTYPE html>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
 <html>
-<style>
-#nRadius-value {
-    font-family: sans-serif;
-    font-weight: bold;
-}
-</style>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
 <body>
-    <p>
-      <label for="yearOfOlympics" 
-             style="display: inline-block; width: 500px; text-align: right">
-             Year: <span id="selectedYear" style="width:400px">1946</span>
-      </label>
-      <input type="range" min="1946" max="2013" value="1946" id="yearOfOlympics">
-    </p>
-    </body>
-    <script>      
-      var sliderRange = document.getElementById("yearOfOlympics");
-      d3.select("#yearOfOlympics-value").text(sliderRange.value);
-      var selectedYear = document.getElementById("selectedYear");
-      sliderRange.oninput = function() {
-        selectedYear.innerHTML = this.value;
-      }
-      
+    <script src="Java_Scripts/check.js"></script>
+
+
+    <svg class='initialLoad' width=1000 height=1000>
+        <rect class="btn" x="0" y="150" width="40" height="20" onclick="pageLoad(1896,1924)" />
+        <text class="label" x="16" y="164" onclick="pageLoad(1896,1924)">1</text>
+        <rect class="btn" x="41" y="150" width="40" height="20" onclick="pageLoad(1925,1953)" />
+        <text class="label" x="57" y="164" onclick="pageLoad(1925,1953)">2</text>
+        <rect class="btn" x="82" y="150" width="40" height="20" onclick="pageLoad(1954,1983)" />
+        <text class="label" x="98" y="164" onclick="pageLoad(1954,1983)">3</text>
+        <rect class="btn" x="123" y="150" width="40" height="20" onclick="pageLoad(1984,2012)" />
+        <text class="label" x="139" y="164" onclick="pageLoad(1984,2012)">4</text>
+
+    </svg>
+
+
+
+    <script>
+        var sliderStep = d3
+            .sliderBottom()
+            .min(1896)
+            .max(2012)
+            .width(500)
+            .step(4)
+            .ticks(8)
+            .tickFormat(d3.format(''))
+            .default(1896)
+            .on('onchange', val => {
+                d3.select('#value').text(val);
+            });
+
+
+        var gStep = d3
+            .select(".initialLoad")
+            .append('g')
+            .attr('width', 600)
+            .attr('height', 600)
+            .attr('transform', 'translate(200,600)');
+
+        gStep.call(sliderStep);
+        async function pageLoad(startYear, endYear) {
+            const slideData = await d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/SummerOlympicMedalWinnersData.csv', function (d) {
+                if ((d.Year >= startYear) && (d.Year <= endYear)) {
+                    return {
+                        OlympicsHeldYear: d.Year = +d.Year,
+                        MenGoldMedalWinners: d.TotalMenGoldMedalWinners = +d.TotalMenGoldMedalWinners,
+                        MenSilverMedalWinners: d.TotalMenSilverMedalWinners = +d.TotalMenSilverMedalWinners,
+                        MenBronzeMedalWinners: d.TotalMenBronzeMedalWinners = +d.TotalMenBronzeMedalWinners,
+                        WomenGoldMedalWinners: d.TotalWomenGoldMedalWinners = +d.TotalWomenGoldMedalWinners,
+                        WomenSilverMedalWinners: d.TotalWomenSilverMedalWinners = +d.TotalWomenSilverMedalWinners,
+                        WomenBronzeMedalWinners: d.TotalWomenBronzeMedalWinners = +d.TotalWomenBronzeMedalWinners,
+                        TotalMenMedalWinners: d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners,
+                        TotalWomenMedalWinners: d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners,
+                        MenMedalWinnersPer100: Math.round(((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100,
+                        WomenMedalWinnersPer100: Math.round(((d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100
+                    };
+                }
+            }).then(function (data) {
+               console.log(data);
+            })
+        }
     </script>
+</body>
 
 </html>

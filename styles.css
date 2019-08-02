@@ -1,9 +1,55 @@
-body {
-    background-color: powderblue;
+.arc text {
+    font: 12px sans-seriff;
+    text-anchor: middle;
 }
-h1 {
-    color: blue;
+
+.arc path {
+    stroke: white;
 }
-p {
-    color: red;
+
+rect.btn {
+    stroke:black;
+    fill:white;
+    fill-opacity:0;
+    stroke-opacity:1;
+  }
+
+.label {
+    cursor: default;
+    font: 12px sans-serif;
+    font-size:"5";
+    fill:blue;
+}
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+text {
+    font-family: arial;
+    font-size: 12px;
+}
+
+
+path.lineMen {
+    fill: none;
+    stroke: blue;
+    stroke-width: 3px;
+}
+
+path.lineWomen {
+    fill: none;
+    stroke: pink;
+    stroke-width: 3px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: slategray;
+  shape-rendering: crispEdges;
 }

@@ -1,48 +1,134 @@
 <!DOCTYPE html>
-<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
 <html>
-    <head>
-        <link rel="stylesheet" href="styles.css">
-        <script src="Java_Scripts/check.js"></script>
-    </head>
-    <body >
-            <p>
-                    <label for="OlympicsHeldYear" 
-                           style="display: inline-block; width: 500px; text-align: right">
-                           Year: <span id="selectedYear" style="width:400px">1896</span>
-                    </label>
-                    <input type="range" min="1896" max="2012" value="1896" id="OlympicsHeldYear">
-                  </p>
-        <button onclick="pageLoad(1896,1924)">1</button><button onclick="pageLoad(1925,1953)">2</button><button onclick="pageLoad(1954,1983)">3</button><button onclick="pageLoad(1984,2012)">4</button>
-    </body>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <script src="Java_Scripts/check.js"></script>
+
+
+    <svg class='initialLoad' width=1000 height=1000>
+        <rect class="btn" x="0" y="150" width="40" height="20" onclick="pageLoad(1896,2012)" />
+        <text class="label" x="16" y="164" onclick="pageLoad(1896,2012)">1</text>
+        <rect class="btn" x="41" y="150" width="40" height="20" onclick="pageLoad(1896,1924)" />
+        <text class="label" x="57" y="164" onclick="pageLoad(1896,1924)">2</text>
+        <rect class="btn" x="82" y="150" width="40" height="20" onclick="pageLoad(1925,1953)" />
+        <text class="label" x="98" y="164" onclick="pageLoad(1925,1953)">3</text>
+        <rect class="btn" x="123" y="150" width="40" height="20" onclick="pageLoad(1954,1983)" />
+        <text class="label" x="139" y="164" onclick="pageLoad(1954,1983)">4</text>
+        <rect class="btn" x="164" y="150" width="40" height="20" onclick="pageLoad(1984,2012)" />
+        <text class="label" x="180" y="164" onclick="pageLoad(1984,2012)">5</text>
+
+    </svg>
+
+
+
     <script>
-      document.getElementById("OlympicsHeldYear").step = "4";
-      var sliderRange = document.getElementById("OlympicsHeldYear");
-      var selectedYear = document.getElementById("selectedYear");
-      sliderRange.oninput = function() {
-        selectedYear.innerHTML = this.value;
-      }
-        async function pageLoad(startYear,endYear) {
-            const slideOneData = await d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/SummerOlympicMedalWinnersData.csv', function (d) {
-                if ((d.Year >= startYear) && (d.Year <= endYear))
-                {
-                    return {                   
-                        OlympicsHeldYear : d.Year = +d.Year,
-                        MenGoldMedalWinners : d.TotalMenGoldMedalWinners = +d.TotalMenGoldMedalWinners,
-                        MenSilverMedalWinners : d.TotalMenSilverMedalWinners = +d.TotalMenSilverMedalWinners,
-                        MenBronzeMedalWinners : d.TotalMenBronzeMedalWinners = +d.TotalMenBronzeMedalWinners,
-                        WomenGoldMedalWinners : d.TotalWomenGoldMedalWinners = +d.TotalWomenGoldMedalWinners,
-                        WomenSilverMedalWinners : d.TotalWomenSilverMedalWinners = +d.TotalWomenSilverMedalWinners,
-                        WomenBronzeMedalWinners : d.TotalWomenBronzeMedalWinners = +d.TotalWomenBronzeMedalWinners,
-                        TotalMenMedalWinners : d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners,
-                        TotalWomenMedalWinners : d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners,
-                        MenMedalWinnersPer100 : Math.round(((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners)/((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners))*100)*100)/100,
-                        WomenMedalWinnersPer100 : Math.round(((d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)/((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners))*100)*100)/100
+        var parseDate = d3.timeParse("%Y");
+        var minDate = new Date();
+        var maxDate = new Date();
+        var margin = { left: 30, right: 20, top: 20, bottom: 30 };
+        var width = 1000 - margin.left - margin.right;
+        var height = 500 - margin.top - margin.bottom;
+        var sliderStep = d3
+            .sliderBottom()
+            .min(1896)
+            .max(2012)
+            .width(500)
+            .step(4)
+            .ticks(8)
+            .tickFormat(d3.format(''))
+            .default(1896)
+            .on('onchange', val => {
+                d3.select('#value').text(val);
+            });
+
+
+        var gStep = d3
+            .select(".initialLoad")
+            .append('g')
+            .attr('width', 600)
+            .attr('height', 600)
+            .attr('transform', 'translate(250,600)');
+
+        gStep.call(sliderStep);
+        function pageLoad(startYear, endYear) {
+            const slideData = d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/SummerOlympicMedalWinnersData.csv').row(function (d) {
+                if ((d.Year >= startYear) && (d.Year <= endYear)) {
+                    return {
+                        OlympicsHeldYear: parseDate(d.Year),
+                        MenGoldMedalWinners: d.TotalMenGoldMedalWinners = +d.TotalMenGoldMedalWinners,
+                        MenSilverMedalWinners: d.TotalMenSilverMedalWinners = +d.TotalMenSilverMedalWinners,
+                        MenBronzeMedalWinners: d.TotalMenBronzeMedalWinners = +d.TotalMenBronzeMedalWinners,
+                        WomenGoldMedalWinners: d.TotalWomenGoldMedalWinners = +d.TotalWomenGoldMedalWinners,
+                        WomenSilverMedalWinners: d.TotalWomenSilverMedalWinners = +d.TotalWomenSilverMedalWinners,
+                        WomenBronzeMedalWinners: d.TotalWomenBronzeMedalWinners = +d.TotalWomenBronzeMedalWinners,
+                        TotalMenMedalWinners: d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners,
+                        TotalWomenMedalWinners: d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners,
+                        MenMedalWinnersPer100: Math.round(((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100,
+                        WomenMedalWinnersPer100: Math.round(((d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100
                     };
                 }
-            }).then (function (data) {
-                console.log(data);
-            });    
+            })
+                .get(function (error, rows) {
+                    maxMedalsMenWon = d3.max(rows, function (d) { return d.MenMedalWinnersPer100; });
+                    console.log(maxMedalsMenWon);
+                    maxMedalsWomenWon = d3.max(rows, function (d) { return d.WomenMedalWinnersPer100; });
+                    console.log(maxMedalsWomenWon);
+                    startOlympicsHeldYear = d3.min(rows, function (d) { return d.OlympicsHeldYear; });
+                    console.log(startOlympicsHeldYear);
+                    endOlympicsHeldYear = d3.max(rows, function (d) { return d.OlympicsHeldYear; });
+                    console.log(endOlympicsHeldYear);
+
+                    var y = d3.scaleLinear()
+                        .domain([0, 100])
+                        .range([height, 0]);
+
+                    var x = d3.scaleTime()
+                        .domain([startOlympicsHeldYear, endOlympicsHeldYear])
+                        .range([0, width/2+10]);
+
+                    var yAxis = d3.axisLeft(y);
+
+                    var xAxis = d3.axisBottom(x);
+                    var lineMen = d3.line()
+                        .x(function (d) { return x(d.OlympicsHeldYear); })
+                        .y(function (d) { return y(d.MenMedalWinnersPer100); })
+                        .curve(d3.curveCardinal);
+
+                    var lineWomen = d3.line()
+                        .x(function (d) { return x(d.OlympicsHeldYear); })
+                        .y(function (d) { return y(d.WomenMedalWinnersPer100); })
+                        .curve(d3.curveCardinal);
+
+                    var svg = d3.select(".initialLoad").append("g").attr("height", "500").attr("width", "500");
+                    var chartGroup = svg.append("g").attr("class", "chartGroup").attr("transform", "translate(" + 250 + "," + 100 + ")");
+                    chartGroup.append("path")
+                        .attr("class", "lineMen")
+                        .attr("d", function (d) { return lineMen(rows); })
+                    
+                    chartGroup.append("path")
+                        .attr("class", "lineWomen")
+                        .attr("d", function (d) { return lineWomen(rows); })
+
+                    chartGroup.append("g")
+                        .attr("class", "axis x")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                    chartGroup.append("g")
+                        .attr("class", "axis y")
+                        .call(yAxis);
+
+                });
+
         }
     </script>
+</body>
+
 </html>
