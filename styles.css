@@ -1,16 +1,8 @@
-.arc text {
-    font: 12px sans-seriff;
-    text-anchor: middle;
-}
-
-.arc path {
-    stroke: white;
-}
 
 rect.btn {
     stroke:black;
-    fill:white;
-    fill-opacity:0;
+    fill:lightgrey;
+    fill-opacity:1;
     stroke-opacity:1;
   }
 
@@ -32,19 +24,33 @@ html, body {
 text {
     font-family: arial;
     font-size: 12px;
+
 }
 
+.slideData {
+ 
+  width: 130px;
+  height: 20px;
+  text-align: justify;
+}
+path.initialLine{
+    fill:none;
+    stroke-width: 1px;
+}
+path.sliderBar {
+    transition-duration: 5s;
+}
 
 path.lineMen {
     fill: none;
-    stroke: blue;
-    stroke-width: 3px;
+    stroke:lightblue;
+    stroke-width: 8px;
 }
 
 path.lineWomen {
     fill: none;
     stroke: pink;
-    stroke-width: 3px;
+    stroke-width: 8px;
 }
 
 .axis path,
@@ -53,3 +59,16 @@ path.lineWomen {
   stroke: slategray;
   shape-rendering: crispEdges;
 }
+
+.toolTip {
+    position: absolute;
+    display: none;
+    min-width: 80px;
+    height: auto;
+    background: none repeat scroll 0 0 #ffffff;
+    border: 1px solid #6F257F;
+    padding: 14px;
+    text-align: center;
+  }
+
+  

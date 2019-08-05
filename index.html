@@ -1,67 +1,138 @@
 <!DOCTYPE html>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://unpkg.com/d3-simple-slider"></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
 <html>
 
 <head>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: lightcyan;
+        }
+
+        img {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            width: 150px;
+            background-position: top center;
+        }
+    </style>
 
 </head>
 
-<body>
+<body onload="initialLoad()">
+
+
     <script src="Java_Scripts/check.js"></script>
 
 
-    <svg class='initialLoad' width=1000 height=1000>
-        <rect class="btn" x="0" y="150" width="40" height="20" onclick="pageLoad(1896,2012)" />
-        <text class="label" x="16" y="164" onclick="pageLoad(1896,2012)">1</text>
-        <rect class="btn" x="41" y="150" width="40" height="20" onclick="pageLoad(1896,1924)" />
-        <text class="label" x="57" y="164" onclick="pageLoad(1896,1924)">2</text>
-        <rect class="btn" x="82" y="150" width="40" height="20" onclick="pageLoad(1925,1953)" />
-        <text class="label" x="98" y="164" onclick="pageLoad(1925,1953)">3</text>
-        <rect class="btn" x="123" y="150" width="40" height="20" onclick="pageLoad(1954,1983)" />
-        <text class="label" x="139" y="164" onclick="pageLoad(1954,1983)">4</text>
-        <rect class="btn" x="164" y="150" width="40" height="20" onclick="pageLoad(1984,2012)" />
-        <text class="label" x="180" y="164" onclick="pageLoad(1984,2012)">5</text>
 
+
+    <svg class='loadSlides' width=1000 height=1000>
+        <image xlink:href="olympics_ring.png" x="30" y="50" width="150px" />
+        <rect class="btn" x="30" y="150" width="40" height="20" onclick="pageLoad(1896,1924)" />
+        <text class="label" x="46" y="166" onclick="pageLoad(1896,1924)">1</text>
+        <foreignObject x="30" y="180" width="150" height="500">
+            <div xmlns="http://www.w3.org/1999/xhtml" id='slideOneInfo'> </div>
+        </foreignObject>
+        <rect class="btn" x="71" y="150" width="40" height="20" onclick="pageLoad(1896,1954)" />
+        <text class="label" x="87" y="166" onclick="pageLoad(1896,1953)">2</text>
+        <foreignObject x="30" y="180" width="150" height="500">
+            <div xmlns="http://www.w3.org/1999/xhtml" id='slideTwoInfo'> </div>
+        </foreignObject>
+        <rect class="btn" x="112" y="150" width="40" height="20" onclick="pageLoad(1896,1983)" />
+        <text class="label" x="128" y="166" onclick="pageLoad(1896,1983)">3</text>
+        <foreignObject x="30" y="180" width="150" height="500">
+            <div xmlns="http://www.w3.org/1999/xhtml" id='slideThreeInfo'> </div>
+        </foreignObject>
+        <rect class="btn" x="153" y="150" width="40" height="20" onclick="pageLoad(1896,2012)" />
+        <text class="label" x="169" y="166" onclick="pageLoad(1896,2012)">4</text>
+        <foreignObject x="30" y="180" width="150" height="500">
+            <div xmlns="http://www.w3.org/1999/xhtml" id='slideFourInfo'> </div>
+        </foreignObject>
+        <foreignObject x="750" y="50" width="300" height="100">
+            <div xmlns="http://www.w3.org/1999/xhtml" id='dropDown'></div>
+        </foreignObject>
     </svg>
 
 
-
     <script>
-        var parseDate = d3.timeParse("%Y");
-        var minDate = new Date();
-        var maxDate = new Date();
-        var margin = { left: 30, right: 20, top: 20, bottom: 30 };
-        var width = 1000 - margin.left - margin.right;
-        var height = 500 - margin.top - margin.bottom;
+        var olympicHeldYears = [1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012];
+        var dropDownValue = "All Medal Winners [Men vs Women]";
+        var compareValues;
+        var lineMen, lineWomen;
         var sliderStep = d3
             .sliderBottom()
             .min(1896)
             .max(2012)
-            .width(500)
+            .width(730)
             .step(4)
             .ticks(8)
             .tickFormat(d3.format(''))
             .default(1896)
+            .handle(
+                d3.symbol()
+                    .type(d3.symbolCircle)
+                    .size(300)
+            )
+            .fill("darkkhaki")
             .on('onchange', val => {
                 d3.select('#value').text(val);
+                pageLoad(1896, val);
             });
-
-
-        var gStep = d3
-            .select(".initialLoad")
+        var gSliderStep = d3
+            .select(".loadSlides")
             .append('g')
             .attr('width', 600)
             .attr('height', 600)
             .attr('transform', 'translate(250,600)');
 
-        gStep.call(sliderStep);
+        var dropDownList = ["All Medal Winners [Men vs Women]", "Gold Medal Winners [Men vs Women]", "Silver Medal Winners [Men vs Women", "Bronze Medal Winners [Men vs Women]"];
+
+        var parseDate = d3.timeParse("%Y");
+
+        var dropDown = d3.select("div#dropDown")
+            .insert("select", ".loadSlides")
+            .selectAll("option")
+            .data(dropDownList)
+            .enter()
+            .append("option")
+            .attr("value", function (d) { return d })
+            .text(function (d) { return d; })
+
+        var xbarScale = d3.scaleBand()
+            .rangeRound([0, 750])
+            .paddingInner(0.1);
+
+        var betweenBarsScale = d3.scaleBand()
+            .padding(0.5);
+
+        var yScale = d3.scaleLinear()
+            .rangeRound([500, 0]);
+
+        var colorScale = d3.scaleOrdinal()
+            .range(["lightblue", "pink"]);
+
+        function initialLoad() {
+            pageLoad(1896, 2012);
+        }
+
         function pageLoad(startYear, endYear) {
+            loadSlideDetails(startYear, endYear, dropDownValue);
+            d3.select("select").on('change', function (d) {
+                dropDownValue = d3.select(this).property('value');
+                loadSlideDetails(startYear, endYear, dropDownValue);
+                console.log(dropDownValue);
+            })
+        }
+        function loadSlideDetails(startYear, endYear, selectedDropDown) {
             const slideData = d3.csv('https://raw.githubusercontent.com/samsri01/Repo-For-CSV-File-Storage/master/SummerOlympicMedalWinnersData.csv').row(function (d) {
                 if ((d.Year >= startYear) && (d.Year <= endYear)) {
                     return {
-                        OlympicsHeldYear: parseDate(d.Year),
+                        OlympicsHeldYear: d.Year = +d.Year,
+                        parsedOlympicYear: parseDate(d.Year),
                         MenGoldMedalWinners: d.TotalMenGoldMedalWinners = +d.TotalMenGoldMedalWinners,
                         MenSilverMedalWinners: d.TotalMenSilverMedalWinners = +d.TotalMenSilverMedalWinners,
                         MenBronzeMedalWinners: d.TotalMenBronzeMedalWinners = +d.TotalMenBronzeMedalWinners,
@@ -71,59 +142,272 @@
                         TotalMenMedalWinners: d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners,
                         TotalWomenMedalWinners: d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners,
                         MenMedalWinnersPer100: Math.round(((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100,
-                        WomenMedalWinnersPer100: Math.round(((d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100
+                        WomenMedalWinnersPer100: Math.round(((d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners) / ((d.TotalMenGoldMedalWinners + d.TotalMenSilverMedalWinners + d.TotalMenBronzeMedalWinners) + (d.TotalWomenGoldMedalWinners + d.TotalWomenSilverMedalWinners + d.TotalWomenBronzeMedalWinners)) * 100) * 100) / 100,
+                        MenGoldMedalWinnersPer100: Math.round((d.TotalMenGoldMedalWinners / (d.TotalMenGoldMedalWinners + d.TotalWomenGoldMedalWinners) * 100) * 100) / 100,
+                        WomenGoldMedalWinnersPer100: Math.round((d.TotalWomenGoldMedalWinners / (d.TotalMenGoldMedalWinners + d.TotalWomenGoldMedalWinners) * 100) * 100) / 100,
+                        MenSilverMedalWinnersPer100: Math.round((d.TotalMenSilverMedalWinners / (d.TotalMenSilverMedalWinners + d.TotalWomenSilverMedalWinners) * 100) * 100) / 100,
+                        WomenSilverMedalWinnersPer100: Math.round((d.TotalWomenSilverMedalWinners / (d.TotalMenSilverMedalWinners + d.TotalWomenSilverMedalWinners) * 100) * 100) / 100,
+                        MenBronzeMedalWinnersPer100: Math.round((d.TotalMenBronzeMedalWinners / (d.TotalMenBronzeMedalWinners + d.TotalWomenBronzeMedalWinners) * 100) * 100) / 100,
+                        WomenBronzeMedalWinnersPer100: Math.round((d.TotalWomenBronzeMedalWinners / (d.TotalMenBronzeMedalWinners + d.TotalWomenBronzeMedalWinners) * 100) * 100) / 100
                     };
                 }
             })
-                .get(function (error, rows) {
-                    maxMedalsMenWon = d3.max(rows, function (d) { return d.MenMedalWinnersPer100; });
-                    console.log(maxMedalsMenWon);
-                    maxMedalsWomenWon = d3.max(rows, function (d) { return d.WomenMedalWinnersPer100; });
-                    console.log(maxMedalsWomenWon);
-                    startOlympicsHeldYear = d3.min(rows, function (d) { return d.OlympicsHeldYear; });
-                    console.log(startOlympicsHeldYear);
-                    endOlympicsHeldYear = d3.max(rows, function (d) { return d.OlympicsHeldYear; });
-                    console.log(endOlympicsHeldYear);
+                .get(function (error, data) {
 
+                    var minDate = parseDate(1896);
+                    var maxDate = parseDate(2012);
                     var y = d3.scaleLinear()
                         .domain([0, 100])
-                        .range([height, 0]);
+                        .range([500, 0]);
 
                     var x = d3.scaleTime()
-                        .domain([startOlympicsHeldYear, endOlympicsHeldYear])
-                        .range([0, width/2+10]);
+                        .domain([minDate, maxDate])
+                        .range([0, 750]);
 
-                    var yAxis = d3.axisLeft(y);
+                    if (selectedDropDown === "All Medal Winners [Men vs Women]") {
+                        console.log(endYear);
+                        lineMen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.MenMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
 
-                    var xAxis = d3.axisBottom(x);
-                    var lineMen = d3.line()
-                        .x(function (d) { return x(d.OlympicsHeldYear); })
-                        .y(function (d) { return y(d.MenMedalWinnersPer100); })
-                        .curve(d3.curveCardinal);
+                        lineWomen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.WomenMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
+                        compareValues = ["MenMedalWinnersPer100", "WomenMedalWinnersPer100"];
+                    } else if (selectedDropDown === "Gold Medal Winners [Men vs Women]") {
+                        lineMen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.MenGoldMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
 
-                    var lineWomen = d3.line()
-                        .x(function (d) { return x(d.OlympicsHeldYear); })
-                        .y(function (d) { return y(d.WomenMedalWinnersPer100); })
-                        .curve(d3.curveCardinal);
+                        lineWomen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.WomenGoldMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
+                        compareValues = ["MenGoldMedalWinnersPer100", "WomenGoldMedalWinnersPer100"];
+                    } else if (selectedDropDown === "Silver Medal Winners [Men vs Women]") {
+                        lineMen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.MenSilverMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
 
-                    var svg = d3.select(".initialLoad").append("g").attr("height", "500").attr("width", "500");
-                    var chartGroup = svg.append("g").attr("class", "chartGroup").attr("transform", "translate(" + 250 + "," + 100 + ")");
+                        lineWomen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.WomenSilverMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
+                        compareValues = ["MenSilverMedalWinnersPer100", "WomenSilverMedalWinnersPer100"];
+                    } else if (selectedDropDown === "Bronze Medal Winners [Men vs Women]") {
+                        lineMen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.MenBronzeMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
+
+                        lineWomen = d3.line()
+                            .x(function (d) { return x(d.parsedOlympicYear); })
+                            .y(function (d) { return y(d.WomenBronzeMedalWinnersPer100); })
+                            .curve(d3.curveCardinal);
+                        compareValues = ["MenBronzeMedalWinnersPer100", "WomenBronzeMedalWinnersPer100"];
+                    }
+
+
+                    if (endYear == 1924) {
+                        d3.select("div#slideOneInfo").attr("class", "slideData").text("In this current slide, we observe, identify the trends between men and women winning olympic medals in summer olympics games that have taken place between 1896 and 1924. Summary : Women were allowed to participate in Summer Olympics 1900 (2.2 % of Women partiipation of the total participation had been recorded) and World War I Erupted from 1914-1919, abandoning 1916 Summer Olympics Event");
+                    } else if (endYear == 1954) {
+                        d3.select("div#slideOneInfo").attr("class", "slideData").text("In this current slide, we observe, identify the trends between men and women winning olympic medals in summer olympics games that have taken place between 1896 and 1954. Summary : Athletics and Gymnastics were added to Women Olympic Events during this period has slowly/ steadily increased the participation and World War II Erupted from 1939-1945, abandoning 1940, 1944 Summer Olympics Events");
+                    } else if (endYear == 1983) {
+                        d3.select("div#slideOneInfo").attr("class", "slideData").text("In this current slide, we observe, identify the trends between men and women winning olympic medals in summer olympics games that have taken place between 1896 and 1983. Summary : Rowing, Handball, Volleyball, Luge, Basketball and Hockey were added to Women Olympic Events during this period.Women participation kept increasing as new events were added.");
+                    } else if (endYear == 2012) {
+                        d3.select("div#slideOneInfo").attr("class", "slideData").text("This presentation talks about how participation from women has increased in Summer Olympics starting from 1896-2012, from the time when they were not allowed to participate (1896) till current year, there is a lot of things which makes us feel the men/ women equality. With this current pace, Women are sure to match Men in winning medals. Explore this cool stuff,for changing trends,if you have not yet done alredy !!!");
+                    }
+
+                    var svg = d3.select(".loadSlides").append("g");
+
+                    var chartGroup = svg.append("g").attr("class", "chartGroup").attr("transform", "translate(" + 240 + "," + 50 + ")");
+
                     chartGroup.append("path")
+                        .attr("class", "initialLine")
+                        .transition()
+                        .duration(1000)
+                        .attr("d", function (d) { return lineMen(data); })
+                        .transition()
+                        .duration(4000)
                         .attr("class", "lineMen")
-                        .attr("d", function (d) { return lineMen(rows); })
-                    
+
+
+
                     chartGroup.append("path")
+                        .attr("class", "initialLine")
+                        .transition()
+                        .duration(1000)
+                        .attr("d", function (d) { return lineWomen(data); })
+                        .transition()
+                        .duration(8000)
                         .attr("class", "lineWomen")
-                        .attr("d", function (d) { return lineWomen(rows); })
+                    xbarScale.domain(olympicHeldYears);
+                    betweenBarsScale.domain(compareValues).rangeRound([0, xbarScale.bandwidth()]);
+                    yScale.domain([0, d3.max(data, function (d) { return d3.max(compareValues, function (key) { return d[key]; }); })]).nice();
 
-                    chartGroup.append("g")
-                        .attr("class", "axis x")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(xAxis);
+                    d3.select(".loadSlides").selectAll("path.lineMen").remove();
+                    d3.select(".loadSlides").selectAll("path.lineWomen").remove();
+                    d3.select(".loadSlides").selectAll("g.bar").remove();
+                    d3.select(".loadSlides").selectAll("g.tick").remove();
 
-                    chartGroup.append("g")
-                        .attr("class", "axis y")
-                        .call(yAxis);
+                    var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+                    var loadSlideData = d3.select(".loadSlides");
+                    const annotateWWII = [
+                        {
+                            note: {
+                                label: "Start : 1939 , End:  1945 " +
+                                    "Olympic Games Were Abondoned Due To War. ",
+
+                                title: "World War II"
+                            },
+                            type: d3.annotationCalloutCircle,
+                            subject: {
+                                radius: 25,
+                                radiusPadding: 20
+                            },
+                            color: ["red"],
+                            x: 539,
+                            y: 540,
+                            dy: 100,
+                            dx: 100
+                        }
+                    ]
+
+                    const annotateWWI = [
+                        {
+                            note: {
+                                label: "Start : 1914 , End:  1919 " +
+                                    "Olympic Games Were Abondoned Due To War. ",
+
+                                title: "World War I"
+                            },
+                            type: d3.annotationCalloutCircle,
+                            subject: {
+                                radius: 15,
+                                radiusPadding: 20
+                            },
+                            color: ["red"],
+                            x: 378,
+                            y: 540,
+                            dy: 100,
+                            dx: 100
+                        }
+                    ]
+
+                    const annotateWomenParticipation = [
+                        {
+                            note: {
+                                label: "Women Were Not Allowed To Participate Until 1900",
+                                title: "Olympics Only For Men In 1896",
+                                align: "middle",
+                                wrap: 300,
+                                padding: 5
+                            },
+                            color: "blue",
+                            x: 250,
+                            y: 160,
+                            dy: -115,
+                            dx: 150
+                        }
+                    ]
+
+                    const makeAnnotateWomenParticipation = d3.annotation()
+                        .annotations(annotateWomenParticipation)
+
+                    d3.select(".loadSlides")
+                        .append("g")
+                        .call(makeAnnotateWomenParticipation)
+
+                    const makeAnnotateWWII = d3.annotation()
+                        .annotations(annotateWWII)
+
+                    const makeAnnotateWWI = d3.annotation()
+                        .annotations(annotateWWI)
+                    d3.select(".loadSlides")
+                        .append("g")
+                        .call(makeAnnotateWWII)
+
+                    d3.select(".loadSlides")
+                        .append("g")
+                        .call(makeAnnotateWWI)
+
+
+                    loadSlideData.append("g")
+                        .selectAll("g")
+                        .data(data)
+                        .enter().append("g")
+                        .attr("class", "bar")
+                        .attr("transform", function (d) { return "translate(" + xbarScale(d.OlympicsHeldYear) + ",0)"; })
+                        .selectAll("rect")
+                        .data(function (d) { return compareValues.map(function (key) { return { key: key, value: d[key] }; }); })
+                        .enter().append("rect")
+                        .attr("x", function (d) { return betweenBarsScale(d.key); })
+                        .attr("y", function (d) { return yScale(d.value); })
+                        .attr("width", 5)
+                        .attr("transform", "translate(" + 240 + "," + 50 + ")")
+                        .attr("height", function (d) { return 500 - yScale(d.value); })
+                        .attr("fill", function (d) { return colorScale(d.key); })
+                        .on("mousemove", function (d) {
+                            tooltip
+                                .style("left", d3.event.pageX - 50 + "px")
+                                .style("top", d3.event.pageY - 70 + "px")
+                                .style("display", "inline-block")
+                                .html("Medal Winners Per 100" + " : " + d.value);
+                        })
+
+                        .on("mouseout", function (d) { tooltip.style("display", "none"); });
+
+
+
+                    loadSlideData.append("g")
+                        .attr("class", "xaxis")
+                        .attr("transform", "translate(" + 240 + "," + 550 + ")")
+                        .call(d3.axisBottom(xbarScale))
+                        .selectAll("text")
+                        .attr("y", 0)
+                        .attr("x", 9)
+                        .attr("dy", ".35em")
+                        .attr("transform", "rotate(90)")
+                        .style("text-anchor", "start");
+
+                    loadSlideData.append("g")
+                        .attr("class", "yaxis")
+                        .attr("transform", "translate(" + 240 + "," + 50 + ")")
+                        .call(d3.axisLeft(yScale).tickFormat(function (d) {
+                            return d + "%";
+                        }));
+
+                    var legend = loadSlideData.append("g")
+                        .attr("class", "text")
+                        .selectAll("g")
+                        .data(["Men", "Women"])
+                        .enter().append("g")
+                        .attr("transform", function (d, i) { return "translate(" + 450 + "," + (30 + (20 * i)) + ")"; });
+
+                    legend.append("circle")
+                        .attr("cx", 460)
+                        .attr("cy", 110)
+                        .attr("r", 10)
+                        //.attr("height", 20)
+                        .attr("fill", colorScale)
+                        .attr("stroke", colorScale)
+                        .attr("stroke-width", 2);
+
+
+                    legend.append("text")
+                        .attr("x", 480)
+                        .attr("y", 110)
+                        .attr("dy", "0.32em")
+                        .text(function (d) { return d; });
+
+
+
+                    gSliderStep.transition().duration(5000).call(sliderStep);
+                    sliderStep.value(endYear);
 
                 });
 
