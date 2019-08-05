@@ -5,6 +5,7 @@
 <html>
 
 <head>
+    
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -31,6 +32,9 @@
 
 
     <svg class='loadSlides' width=1000 height=1000>
+        <foreignObject x="20" y="10" width="200" height="500">
+                <div xmlns="http://www.w3.org/1999/xhtml">Summer Olympics - Women Participation Trends </div>
+        </foreignObject>
         <image xlink:href="olympics_ring.png" x="30" y="50" width="150px" />
         <rect class="btn" x="30" y="150" width="40" height="20" onclick="pageLoad(1896,1924)" />
         <text class="label" x="46" y="166" onclick="pageLoad(1896,1924)">1</text>
@@ -356,7 +360,7 @@
                                 .style("left", d3.event.pageX - 50 + "px")
                                 .style("top", d3.event.pageY - 70 + "px")
                                 .style("display", "inline-block")
-                                .html("Medal Winners Per 100" + " : " + d.value);
+                                .html(d.key + " : " + d.value);
                         })
 
                         .on("mouseout", function (d) { tooltip.style("display", "none"); });
